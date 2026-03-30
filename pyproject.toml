@@ -1,0 +1,14 @@
+[project]
+name = "airquality-health-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.42.78",
+    "curl-cffi>=0.14.0",
+    "dotenv>=0.9.9",
+    "google-cloud-storage>=3.10.1",
+    "pandas>=3.0.1",
+    "requests>=2.32.5",
+]

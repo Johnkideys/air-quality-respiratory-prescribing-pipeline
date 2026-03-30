@@ -1,0 +1,32 @@
+# environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+EOF
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Data files
+openaq_data/
+openaq_sample/
+temp_epd/
+output_epd/
+*.csv
+*.csv.gz
+*.parquet
+
+# data files
+openaq_data/
+openaq_sample
+
+# my scratchpad file
+notes.md 
+api_notes.md
+
+*.tfvars
