@@ -28,5 +28,30 @@ openaq_sample
 # my scratchpad file
 notes.md 
 api_notes.md
+learning_diary.md
 
 *.tfvars
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Airflow
+orchestration/logs/
+orchestration/plugins/
+orchestration/.env
+
+# Exploration data outputs
+exploration/OpenAQData/openaq_data/
+exploration/OpenAQData/openaq_sample/
+exploration/output_epd/
+exploration/output_prescribing/
+
+# OS
+.DS_Store
+
+# Streamlit
+streamlit_app/.streamlit/secrets.toml
+streamlit_app/app.py

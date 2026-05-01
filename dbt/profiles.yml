@@ -1,0 +1,10 @@
+air_quality:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: air-quality-and-respiratory
+      dataset: air_quality_asthma
+      location: EU
+      threads: 4

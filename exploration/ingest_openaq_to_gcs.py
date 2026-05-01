@@ -10,7 +10,7 @@ Prerequisites:
     gcloud auth application-default login   (for GCS auth)
 Usage:
     # Backfill last 12 months for all UK stations
-    python ingest_openaq_to_gcs.py
+    uv run ingest_openaq_to_gcs.py
 
     # Specific date range
     python ingest_openaq_to_gcs.py --start 2025-04 --end 2025-12

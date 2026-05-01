@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    database: air-quality-and-respiratory
+    schema: raw
+    tables:
+      - name: practice_locations
+      - name: openaq_measurements
+      - name: prescribing
+      - name: uk_stations

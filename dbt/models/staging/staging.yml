@@ -1,0 +1,29 @@
+models:
+  - name: stg_prescribing
+    description: >
+      Staged NHS prescribing data from OpenPrescribing / NHSBSA.
+      All rows are preserved from source; quality flags are added
+      for downstream filtering in mart models.
+    columns:
+      - name: row_id
+        description: Unique identifier for the prescribing row
+      - name: ccg_code
+        description: Clinical Commissioning Group code
+      - name: is_negative_actual_cost
+        description: True if actual_cost is negative, indicating a reversal or adjustment
+      - name: is_incomplete_record
+        description: True if any of items, quantity or actual_cost are null
+
+  - name: stg_locations
+    description: >
+      Staged OpenAQ location/station metadata. Includes derived fields
+      for monitor type and sensor availability, plus coordinate quality flags.
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+          - unique
+      - name: has_invalid_coordinates
+        description: True if lat/lon fall outside valid geographic bounds
+      - name: monitor_type
+        description: Either 'reference_monitor', 'low_cost_sensor', or 'unknown'

@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: int_monthly_air_quality
+    description: >
+      Monthly aggregated air quality readings per sensor location and pollutant.
+      Filters out negative readings flagged in staging, then averages all readings
+      within a calendar month. One row per location_id + pollutant + month.
+    columns:
+      - name: location_id
+        description: OpenAQ sensor location identifier
+      - name: pollutant
+        description: Pollutant type e.g. no2, pm10, pm25
+      - name: month
+        description: First day of the month the readings were aggregated for e.g. 2025-01-01
+      - name: avg_value
+        description: Average pollutant reading across all measurements in the month
+      - name: min_value
+        description: Minimum pollutant reading in the month
+      - name: max_value
+        description: Maximum pollutant reading in the month
+      - name: reading_count
+        description: Number of individual readings that went into the monthly average
+      - name: unit
+        description: Unit of measurement e.g. µg/m³
+      - name: latitude
+        description: Latitude of the sensor location
+      - name: longitude
+        description: Longitude of the sensor location
+
+  - name: int_practice_sensor_lookup
+    description: >
+      Lookup table mapping each GP practice to all OpenAQ sensor locations within
+      a 10km radius. Uses the Haversine formula to calculate surface distance between
+      practice and sensor coordinates. One row per practice + sensor combination.
+      Bounding box pre-filter (0.09 degrees latitude, 0.13 degrees longitude) is
+      applied before Haversine to reduce computation cost.
+    columns:
+      - name: practice_code
+        description: Unique GP practice code
+      - name: practice_name
+        description: Name of the GP practice
+      - name: practice_lat
+        description: Latitude of the GP practice
+      - name: practice_lon
+        description: Longitude of the GP practice
+      - name: location_id
+        description: OpenAQ sensor location identifier within 10km of the practice
+      - name: sensor_lat
+        description: Latitude of the air quality sensor
+      - name: sensor_lon
+        description: Longitude of the air quality sensor
+      - name: distance_km
+        description: Haversine distance in kilometres between the practice and sensor
