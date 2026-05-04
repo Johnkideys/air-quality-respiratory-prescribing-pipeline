@@ -505,85 +505,92 @@ with tab2:
 # TAB 3: Practice Level
 # ==============================================================
 with tab3:
-    st.markdown("""
-    Practice-level view showing prescribing vs air quality for sensors **within 10km** of each practice.
-    Filter by CCG or individual practice.
-    """)
-
-    df_practice = load_mart_data()
-
-    if df_practice.empty:
-        st.warning("No practice-level data available.")
-        st.stop()
-
-    st.sidebar.header("Practice filters")
-
-    ccgs = sorted(df_practice["ccg_code"].dropna().unique())
-    selected_ccg = st.sidebar.selectbox("CCG", ["All"] + list(ccgs))
-
-    if selected_ccg != "All":
-        df_practice = df_practice[df_practice["ccg_code"] == selected_ccg]
-
-    practices = sorted(df_practice["practice_name"].dropna().unique())
-    selected_practice = st.sidebar.selectbox("Practice", ["All"] + list(practices))
-
-    if selected_practice != "All":
-        df_practice = df_practice[df_practice["practice_name"] == selected_practice]
-
-    pollutants_p = sorted(df_practice["pollutant"].dropna().unique())
-    selected_pollutant_p = st.sidebar.selectbox("Pollutant ", pollutants_p)
-
-    bnf_labels_p = sorted(df_practice["bnf_label"].dropna().unique())
-    selected_bnf_p = st.sidebar.multiselect("BNF categories ", bnf_labels_p, default=bnf_labels_p)
-
-    # Filter
-    filtered_p = df_practice[
-        (df_practice["pollutant"] == selected_pollutant_p) &
-        (df_practice["bnf_label"].isin(selected_bnf_p))
-    ].copy()
-
-    if filtered_p.empty:
-        st.info("No data for selected filters.")
-        st.stop()
-
-    # Aggregate
-    monthly_p = (
-        filtered_p
-        .groupby("prescribing_month", as_index=False)
-        .agg(
-            total_items=("total_items", "sum"),
-            avg_air_quality=("avg_air_quality", "mean")
-        )
-        .sort_values("prescribing_month")
+    st.info(
+        "**This tab is currently disabled for the public demo.**\n\n"
+        "The practice-level query joins millions of prescribing rows with air quality "
+        "readings and scans a large amount of data in BigQuery on "
+        "every page load. To keep costs under control while this dashboard is publicly "
+        "accessible, the tab has been temporarily disabled.\n\n"
     )
-    monthly_p["month_label"] = monthly_p["prescribing_month"].astype(str).str[:7]
 
-    unit_p = filtered_p["unit"].iloc[0] if not filtered_p.empty else ""
-
-    st.subheader(f"Prescriptions vs {selected_pollutant_p} — {selected_practice if selected_practice != 'All' else selected_ccg if selected_ccg != 'All' else 'All practices with nearby sensors'}")
-
-    fig3 = go.Figure()
-    fig3.add_trace(go.Bar(
-        x=monthly_p["month_label"],
-        y=monthly_p["total_items"],
-        name="Total prescription items",
-        marker_color="#636EFA",
-        yaxis="y",
-    ))
-    fig3.add_trace(go.Scatter(
-        x=monthly_p["month_label"],
-        y=monthly_p["avg_air_quality"],
-        name=f"Avg {selected_pollutant_p}",
-        mode="lines+markers",
-        marker_color="#EF553B",
-        yaxis="y2",
-    ))
-    fig3.update_layout(
-        xaxis=dict(title="Month", tickangle=-45, type="category"),
-        yaxis=dict(title="Prescription items", side="left"),
-        yaxis2=dict(title=f"Avg {selected_pollutant_p} ({unit_p})", side="right", overlaying="y", rangemode="tozero"),
-        legend=dict(orientation="h", y=1.12),
-        height=500,
-        margin=dict(t=60),
-    )
-    st.plotly_chart(fig3, use_container_width=True)
+    # ---------------------------------------------------------------
+    # Practice-level code disabled to avoid expensive BQ scans on the
+    # public Streamlit deployment. Uncomment the block below (and the
+    # load_mart_data call) to re-enable.
+    # ---------------------------------------------------------------
+    #
+    # df_practice = load_mart_data()
+    #
+    # if df_practice.empty:
+    #     st.warning("No practice-level data available.")
+    #     st.stop()
+    #
+    # st.sidebar.header("Practice filters")
+    #
+    # ccgs = sorted(df_practice["ccg_code"].dropna().unique())
+    # selected_ccg = st.sidebar.selectbox("CCG", ["All"] + list(ccgs))
+    #
+    # if selected_ccg != "All":
+    #     df_practice = df_practice[df_practice["ccg_code"] == selected_ccg]
+    #
+    # practices = sorted(df_practice["practice_name"].dropna().unique())
+    # selected_practice = st.sidebar.selectbox("Practice", ["All"] + list(practices))
+    #
+    # if selected_practice != "All":
+    #     df_practice = df_practice[df_practice["practice_name"] == selected_practice]
+    #
+    # pollutants_p = sorted(df_practice["pollutant"].dropna().unique())
+    # selected_pollutant_p = st.sidebar.selectbox("Pollutant ", pollutants_p)
+    #
+    # bnf_labels_p = sorted(df_practice["bnf_label"].dropna().unique())
+    # selected_bnf_p = st.sidebar.multiselect("BNF categories ", bnf_labels_p, default=bnf_labels_p)
+    #
+    # filtered_p = df_practice[
+    #     (df_practice["pollutant"] == selected_pollutant_p) &
+    #     (df_practice["bnf_label"].isin(selected_bnf_p))
+    # ].copy()
+    #
+    # if filtered_p.empty:
+    #     st.info("No data for selected filters.")
+    #     st.stop()
+    #
+    # monthly_p = (
+    #     filtered_p
+    #     .groupby("prescribing_month", as_index=False)
+    #     .agg(
+    #         total_items=("total_items", "sum"),
+    #         avg_air_quality=("avg_air_quality", "mean")
+    #     )
+    #     .sort_values("prescribing_month")
+    # )
+    # monthly_p["month_label"] = monthly_p["prescribing_month"].astype(str).str[:7]
+    #
+    # unit_p = filtered_p["unit"].iloc[0] if not filtered_p.empty else ""
+    #
+    # st.subheader(f"Prescriptions vs {selected_pollutant_p}")
+    #
+    # fig3 = go.Figure()
+    # fig3.add_trace(go.Bar(
+    #     x=monthly_p["month_label"],
+    #     y=monthly_p["total_items"],
+    #     name="Total prescription items",
+    #     marker_color="#636EFA",
+    #     yaxis="y",
+    # ))
+    # fig3.add_trace(go.Scatter(
+    #     x=monthly_p["month_label"],
+    #     y=monthly_p["avg_air_quality"],
+    #     name=f"Avg {selected_pollutant_p}",
+    #     mode="lines+markers",
+    #     marker_color="#EF553B",
+    #     yaxis="y2",
+    # ))
+    # fig3.update_layout(
+    #     xaxis=dict(title="Month", tickangle=-45, type="category"),
+    #     yaxis=dict(title="Prescription items", side="left"),
+    #     yaxis2=dict(title=f"Avg {selected_pollutant_p} ({unit_p})", side="right", overlaying="y", rangemode="tozero"),
+    #     legend=dict(orientation="h", y=1.12),
+    #     height=500,
+    #     margin=dict(t=60),
+    # )
+    # st.plotly_chart(fig3, use_container_width=True)
