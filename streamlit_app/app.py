@@ -20,11 +20,15 @@ PROJECT_ID = "air-quality-and-respiratory"
 
 def get_bigquery_client():
     """Return a BigQuery client using Streamlit secrets if available, else local OAuth."""
-    if "gcp_service_account" in st.secrets:
-        credentials = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"]
-        )
-        return bigquery.Client(project=PROJECT_ID, credentials=credentials)
+    try:
+        if "gcp_service_account" in st.secrets:
+            credentials = service_account.Credentials.from_service_account_info(
+                st.secrets["gcp_service_account"],
+                scopes=["https://www.googleapis.com/auth/bigquery"],
+            )
+            return bigquery.Client(project=PROJECT_ID, credentials=credentials)
+    except FileNotFoundError:
+        pass
     return bigquery.Client(project=PROJECT_ID)
 
 DATASET_STAGING = "air_quality_asthma_staging"
