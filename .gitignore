@@ -51,6 +51,7 @@ exploration/output_prescribing/
 
 # OS
 .DS_Store
+.devcontainer/
 
 # Streamlit
 streamlit_app/.streamlit/secrets.toml
