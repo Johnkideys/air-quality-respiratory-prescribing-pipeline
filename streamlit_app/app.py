@@ -10,11 +10,23 @@ import plotly.graph_objects as go
 import numpy as np
 from scipy import stats
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
 st.set_page_config(page_title="Air Quality & Prescribing", layout="wide")
 st.title("Air Quality & Respiratory Prescribing")
 
 PROJECT_ID = "air-quality-and-respiratory"
+
+
+def get_bigquery_client():
+    """Return a BigQuery client using Streamlit secrets if available, else local OAuth."""
+    if "gcp_service_account" in st.secrets:
+        credentials = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"]
+        )
+        return bigquery.Client(project=PROJECT_ID, credentials=credentials)
+    return bigquery.Client(project=PROJECT_ID)
+
 DATASET_STAGING = "air_quality_asthma_staging"
 DATASET_INTERMEDIATE = "air_quality_asthma_intermediate"
 DATASET_MARTS = "air_quality_asthma_marts"
@@ -26,7 +38,7 @@ def load_national_prescription_data():
     Loads prescription data from staging table and filters out 
     is_negative_items and is_incomplete_record.
     """    
-    client = bigquery.Client(project=PROJECT_ID)
+    client = get_bigquery_client()
     query = f"""
         SELECT
             DATE_TRUNC(date, MONTH)             AS prescribing_month,
@@ -47,7 +59,7 @@ def load_national_air_quality():
     """
     Loads air quality data from staging table.
     """  
-    client = bigquery.Client(project=PROJECT_ID)
+    client = get_bigquery_client()
     query = f"""
         SELECT
             month                               AS air_quality_month,
@@ -66,7 +78,7 @@ def load_mart_data():
     """
     Loading the final mart data. 
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = get_bigquery_client()
     query = f"""
         SELECT
             practice_code,
@@ -92,7 +104,7 @@ def load_overview_metadata():
     Returns a dict of high-level counts and date ranges so
     we don't pull millions of rows just for headline metrics.
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = get_bigquery_client()
 
     # Prescribing summary
     rx_query = f"""
