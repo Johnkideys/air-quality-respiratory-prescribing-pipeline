@@ -16,23 +16,29 @@ renamed as (
         lat                                             as latitude,
         lon                                             as longitude,
 
-        -- timestamp handling: split into useful derived columns
+        -- timestamp
         datetime                                        as measured_at,
         DATE(datetime)                                  as measured_date,
-        EXTRACT(YEAR FROM datetime)                     as measurement_year,
-        EXTRACT(MONTH FROM datetime)                    as measurement_month,
-        EXTRACT(HOUR FROM datetime)                     as measurement_hour,
 
         -- measurement
         parameter                                       as pollutant,
         units                                           as unit,
         value                                           as measured_value,
 
-        -- basic data quality flag
+        -- data quality flags
         case
             when value < 0 then true
             else false
-        end                                             as is_negative_value
+        end                                             as is_negative_value,
+
+        -- relevance flag for the respiratory air quality use case.
+        -- Filter on this in intermediate models rather than dropping rows here,
+        -- so the staging layer remains a faithful representation of source data.
+        case
+            when lower(parameter) in ('pm25', 'pm2.5', 'pm10', 'no2', 'o3', 'so2')
+            then true
+            else false
+        end                                             as is_respiratory_pollutant
 
     from source
 

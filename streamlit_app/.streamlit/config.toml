@@ -1,0 +1,18 @@
+[theme]
+# Light theme as the base
+base = "light"
+
+# Primary accent — used for buttons, sliders, selected tabs, checkboxes
+primaryColor = "#4F46E5"          # indigo-600
+
+# Page background
+backgroundColor = "#FAFAFA"        # very light grey, softer than pure white
+
+# Sidebar / cards / widget background
+secondaryBackgroundColor = "#F1F3F5"
+
+# Default text
+textColor = "#111827"              # near-black, easier than pure black
+
+# Font
+font = "sans serif"

@@ -6,6 +6,15 @@ models:
       Monthly aggregated air quality readings per sensor location and pollutant.
       Filters out negative readings flagged in staging, then averages all readings
       within a calendar month. One row per location_id + pollutant + month.
+
+      Aggregation is done in two stages — raw readings are first averaged to a
+      daily mean per station-pollutant, then those daily means are averaged to
+      a monthly mean. This avoids letting non-uniform sampling rates (e.g. a
+      sensor that bursts to 5-minute intervals on some days) skew the monthly
+      average.
+
+      Station-months with fewer than 70% of expected daily readings are dropped
+      to ensure each monthly average is based on adequate temporal coverage.
     columns:
       - name: location_id
         description: OpenAQ sensor location identifier
@@ -33,7 +42,7 @@ models:
       Lookup table mapping each GP practice to all OpenAQ sensor locations within
       a 10km radius. Uses the Haversine formula to calculate surface distance between
       practice and sensor coordinates. One row per practice + sensor combination.
-      Bounding box pre-filter (0.09 degrees latitude, 0.13 degrees longitude) is
+      Bounding box pre-filter (0.10 degrees latitude, 0.19 degrees longitude) is
       applied before Haversine to reduce computation cost.
     columns:
       - name: practice_code
@@ -52,3 +61,25 @@ models:
         description: Longitude of the air quality sensor
       - name: distance_km
         description: Haversine distance in kilometres between the practice and sensor
+
+  - name: int_gp_respiratory_prescribing
+    description: >
+      GP-practice prescribing data filtered to BNF chapter 3 (Respiratory System)
+      only, excluding rows flagged in staging as negative or incomplete.
+      Restricts to setting = 4 (NHS GP practices) per NHS Digital practice
+      characteristics — excludes hospices, care homes, prisons, walk-in centres,
+      and other non-GP prescribing settings that would distort the population-
+      level air quality signal.
+    columns:
+      - name: practice_code
+        description: Unique GP practice code (ODS code)
+      - name: prescribing_month
+        description: First day of the prescribing month
+      - name: bnf_section
+        description: BNF section code or label (chapter 3 only)
+      - name: bnf_label
+        description: Human-readable BNF presentation label
+      - name: items
+        description: Number of prescription items dispensed
+      - name: actual_cost
+        description: Actual reimbursed cost in GBP

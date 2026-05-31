@@ -2,22 +2,59 @@
 
 > **Data Engineering Zoomcamp 2025 - Capstone Project**
 
+## Table of Contents
+- [Problem Statement/Hypothesis](#problem-statementhypothesis)
+- [Key Findings](#key-findings)
+- [Dashboard](#dashboard)
+- [Data Sources](#data-sources)
+- [Technologies](#technologies)
+- [Pipeline Architecture](#pipeline-architecture)
+- [Key Assumptions](#key-assumptions)
+- [Project Structure](#project-structure)
+- [Reproducing This Project](#reproducing-this-project)
+- [Future Improvements](#future-improvements)
+
 ## Problem Statement/Hypothesis
 
 Does air pollution affect how many asthma inhalers are prescribed? This project builds an end-to-end data pipeline that combines **UK air quality readings** with **NHS GP prescribing data** to explore the relationship between pollution levels and respiratory medication use across England.
 
+## Key Findings
+
+Across all English GP practices, monthly respiratory prescribing shows a **weak
+positive correlation with air pollution levels (Pearson r ≈ 0.21)**.
+
+However this correlation shouldn't be read as a causal link:
+
+- **Seasonality is a likely confounder.** Both pollution and respiratory
+  prescribing peak in winter, so part of this correlation could be
+  following a seasonal cycle rather than pollution driving
+  prescribing.
+- **Monthly aggregation is coarse.** Prescribing data is only published monthly,
+  so air quality is aggregated to match this. A monthly average smooths out
+  any short-term spikes (hours/days), likely weakening any
+  real correlation.
+- **Confounders are uncontrolled** — demographics, deprivation, and local
+  prescribing habits possibly affect both variables.
+
+The value of this project is the **reproducible pipeline** that makes this kind
+of analysis possible, not the strength of this particular correlation.
+
 ## Dashboard
 
-The final output is an interactive Streamlit dashboard with three views:
+The final output is an interactive Streamlit dashboard with four views:
 
-- **Data Overview** — headline metrics and coverage for both datasets
+- **Data Overview** — headline metrics and coverage for both datasets (currently 2025 data)
 - **National Trends** — monthly prescribing volumes overlaid with average pollutant levels (PM2.5, PM10, NO2) across all of England
 - **Practice-Level Trends** — drill down to individual GP practices matched to air quality sensors within 10 km
 
 **Live dashboard:** https://uk-air-quality-and-asthma.streamlit.app/
 
-![Tech Stack](images/dashboard_img_1.png)
-![Tech Stack](images/dashboard_img_2.png)
+![Bar Chart](images/bar_chart.png)
+*National monthly prescribing volumes vs. pollutant levels chart*
+
+![Correlation chart](images/corr_chart.png)
+*Correlation between air quality and respiratory prescribing at practice level for 2025*
+
 
 ## Data Sources
 
@@ -32,7 +69,7 @@ The final output is an interactive Streamlit dashboard with three views:
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Infrastructure | **Terraform** | Provisions GCS bucket (BigQuery datasets created manually — Terraform for these is a future improvement) |
+| Infrastructure | **Terraform** | Provisions GCS bucket (BigQuery datasets created manually - Terraform for these is a future improvement) |
 | Cloud | **Google Cloud Platform** | GCS for data lake, BigQuery for data warehouse |
 | Containerisation | **Docker** | Airflow stack runs in Docker Compose (scheduler, webserver, Postgres) |
 | Orchestration | **Apache Airflow** | DAGs for ingestion, loading, and dbt transforms |
@@ -64,15 +101,24 @@ Triggered after ingestion completes:
 ```
 raw (BigQuery)
   └── staging (views)
-        ├── stg_openaq_measurements   — timestamps, pollutant names, data quality flags
-        ├── stg_prescribing           — rename columns, flag negatives/incomplete records
-        ├── stg_practice_locations    — clean coordinates
-        └── stg_locations             — sensor metadata
+        ├── stg_openaq_measurements    — timestamps, pollutant names, data quality flags
+        ├── stg_prescribing            — rename columns, flag negatives/incomplete records
+        ├── stg_practice_locations     — clean coordinates
+        └── stg_locations              — sensor metadata
   └── intermediate (tables)
-        ├── int_monthly_air_quality   — aggregate daily readings → monthly averages per station/pollutant
-        └── int_practice_sensor_lookup — spatial join: match GP practices to sensors within 10 km (Haversine)
+        ├── int_monthly_air_quality        — aggregate daily readings → monthly averages per station/pollutant
+        ├── int_gp_respiratory_prescribing — filter respiratory prescriptions (BNF section 03) with quality checks
+        └── int_practice_sensor_lookup     — spatial join: match GP practices to sensors within 10 km (Haversine)
   └── marts (tables)
-        └── mart_prescribing_air_quality — final fact table joining prescribing to air quality by practice/month
+        ├── mart_prescribing_air_quality      — fact table joining prescribing to air quality by practice/month
+        ├── mart_practice_monthly_correlation — standardised z-scores for practice-level correlation analysis
+        ├── mart_national_monthly_air_quality — national monthly averages by pollutant
+        ├── mart_national_monthly_prescribing — national monthly totals by BNF label
+        ├── mart_dashboard_overview           — summary statistics and data coverage metrics
+        ├── mart_overview_aq_coverage         — station data coverage by number of months
+        ├── mart_overview_aq_pollutant        — reading counts and station counts per pollutant
+        ├── mart_overview_rx_bnf              — prescription totals by drug type (BNF label)
+        └── mart_overview_rx_monthly          — monthly prescription volume trends
 ```
 
 ### 4. Data warehouse

@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: mart_national_monthly_prescribing
+    description: National-level monthly prescription totals by BNF label, GP practices only, chapter 3 only.
+    columns:
+      - name: prescribing_month
+      - name: bnf_label
+      - name: total_items
+
+  - name: mart_national_monthly_air_quality
+    description: National-level monthly air quality averages by pollutant.
+    columns:
+      - name: air_quality_month
+      - name: pollutant
+      - name: avg_air_quality
+
+  - name: mart_dashboard_overview
+    description: Single-row table of headline counts and date ranges for the dashboard overview tab.
+
+  - name: mart_overview_rx_monthly
+    description: Prescribing row counts per month for the overview tab bar chart.
+
+  - name: mart_overview_rx_bnf
+    description: Prescribing row counts and total items per BNF label for the overview tab.
+
+  - name: mart_prescribing_air_quality
+    description: >
+      Practice x month x BNF label x pollutant fact table joining prescribing
+      data to averaged air quality readings from sensors within 10km of each
+      practice. Partitioned by prescribing_month, clustered by practice_code,
+      pollutant, bnf_label.
+    
+    tests: 
+        # Asserts the grain of the mart: exactly one row per practice × month ×
+        # BNF label × pollutant. Catches accidental fan-out from many-to-many
+        # joins (e.g. multiple sensors per practice) which previously caused
+        # silent over counting of prescription items.
+        - dbt_utils.unique_combination_of_columns:
+            arguments:
+              combination_of_columns:
+                - practice_code
+                - prescribing_month
+                - bnf_label
+                - pollutant

@@ -11,7 +11,7 @@ renamed as (
         practice_code,
         practice_name,
 
-        -- setting type (integer code), check these later
+        -- setting type (integer code) (setting=4 is gp practice)
         setting,
 
         -- geography

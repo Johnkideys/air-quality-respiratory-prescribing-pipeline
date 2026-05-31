@@ -55,4 +55,9 @@ exploration/output_prescribing/
 
 # Streamlit
 streamlit_app/.streamlit/secrets.toml
+streamlit_app/.streamlit/secrets.toml.bak
 app_test.py
+
+# Other
+understanding_dbt_models.excalidraw
+Analysis_Notes.docx

@@ -8,3 +8,5 @@ air_quality:
       dataset: air_quality_asthma
       location: EU
       threads: 4
+      maximum_bytes_billed: 5000000000   # 5 GB per query
+
