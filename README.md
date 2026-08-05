@@ -44,8 +44,8 @@ of analysis possible, not the strength of this particular correlation.
 The final output is an interactive Streamlit dashboard with four views:
 
 - **Data Overview** - headline metrics and coverage for both datasets (currently 2025 data)
-- **National Trends** — monthly prescribing volumes overlaid with average pollutant levels (PM2.5, PM10, NO2) across all of England
-- **Practice-Level Trends** — drill down to individual GP practices matched to air quality sensors within 10 km
+- **National Trends** - monthly prescribing volumes overlaid with average pollutant levels (PM2.5, PM10, NO2) across all of England
+- **Practice-Level Trends** - drill down to individual GP practices matched to air quality sensors within 10 km
 
 **Live dashboard:** https://uk-air-quality-and-asthma.streamlit.app/
 
@@ -64,6 +64,8 @@ The final output is an interactive Streamlit dashboard with four views:
 | [OpenPrescribing](https://openprescribing.net/) (NHS BSA) | Monthly prescription items dispensed by every GP practice in England | JSON API → Parquet | Public REST API |
 
 **BNF sections** included: Bronchodilators (0301), Corticosteroid inhalers (0302), Cromoglicate & related (0303), Systemic corticosteroids (060302).
+
+BNF is the British National Formulary, the UK's standard classification for medicines.
 
 ## Technologies
 
@@ -85,16 +87,16 @@ The final output is an interactive Streamlit dashboard with four views:
 
 Runs monthly (also manually triggerable for backfills):
 
-1. **Refresh UK stations** — fetches current station list from OpenAQ API, uploads to GCS as CSV
-2. **Ingest OpenAQ** — streams CSV.gz files from the public S3 archive to GCS for all UK stations for the target month
-3. **Ingest prescribing** — calls the OpenPrescribing API for each BNF section, saves as Parquet to GCS
+1. **Refresh UK stations** - fetches current station list from OpenAQ API, uploads to GCS as CSV
+2. **Ingest OpenAQ** - streams CSV.gz files from the public S3 archive to GCS for all UK stations for the target month
+3. **Ingest prescribing** - calls the OpenPrescribing API for each BNF section, saves as Parquet to GCS
 
 ### 2. Loading & transformation (`transform_dag`)
 
 Triggered after ingestion completes:
 
-1. **Load to BigQuery** — four parallel tasks load raw data from GCS into BigQuery (`openaq_measurements`, `prescribing`, `practice_locations`, `uk_stations`), with idempotent month-level deletes before appending
-2. **dbt run** — rebuilds all models
+1. **Load to BigQuery** - four parallel tasks load raw data from GCS into BigQuery (`openaq_measurements`, `prescribing`, `practice_locations`, `uk_stations`), with idempotent month-level deletes before appending
+2. **dbt run** - rebuilds all models
 
 ### 3. dbt model layers
 
@@ -136,10 +138,10 @@ The `openaq_measurements` table is **partitioned by month** on the `datetime` co
 
 ## Key Assumptions
 
-- **10 km proximity** — a GP practice is matched to all air quality sensors within 10 km. Readings from multiple sensors are averaged. This is a coarse proxy for patient-level pollution exposure.
-- **Monthly granularity** — both prescribing and air quality are aggregated to monthly level before joining.
-- **England only** — prescribing data covers England; air quality stations are filtered to Great Britain (GB).
-- **Correlation, not causation** — this pipeline enables exploration of trends, not causal inference. Many confounding factors (demographics, seasonality, deprivation) are not controlled for.
+- **10 km proximity** - a GP practice is matched to all air quality sensors within 10 km. Readings from multiple sensors are averaged. This is a coarse proxy for patient-level pollution exposure.
+- **Monthly granularity** - both prescribing and air quality are aggregated to monthly level before joining.
+- **England only** - prescribing data covers England; air quality stations are filtered to Great Britain (GB).
+- **Correlation, not causation** - this pipeline enables exploration of trends, not causal inference. Many confounding factors (demographics, seasonality, deprivation) are not controlled for.
 
 ## Project Structure
 
@@ -175,14 +177,11 @@ The `openaq_measurements` table is **partitioned by month** on the `datetime` co
 - **Terraform** installed
 - **Docker** and Docker Compose
 - **Python 3.13+** and [uv](https://docs.astral.sh/uv/) (for local Streamlit)
-- **OpenAQ API key** (free — register at [openaq.org](https://openaq.org/))
+- **OpenAQ API key** (free - register at [openaq.org](https://openaq.org/))
 
 ### 1. Clone and set up
 
-```bash
-git clone https://github.com/<your-username>/AIrQuality_Health_Project.git
-cd AIrQuality_Health_Project
-```
+Clone this project.
 
 ### 2. Provision infrastructure
 
@@ -256,6 +255,5 @@ uv run streamlit run streamlit_app/app.py
 ## Future Improvements
 
 - Automate BigQuery dataset creation with Terraform
-- Single backfill command that covers both GCS ingestion and BigQuery loading
 - Add dbt tests and schema documentation for the mart layer
 - Include demographic/deprivation data as confounding variables
