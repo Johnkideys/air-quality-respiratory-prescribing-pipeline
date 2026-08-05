@@ -1,6 +1,6 @@
 # Air Quality & Respiratory Prescribing in England
 
-> **Data Engineering Zoomcamp 2025 - Capstone Project**
+> **Data Engineering Zoomcamp 2026 - Capstone Project**
 
 ## Table of Contents
 - [Problem Statement/Hypothesis](#problem-statementhypothesis)
@@ -33,7 +33,7 @@ However this correlation shouldn't be read as a causal link:
   so air quality is aggregated to match this. A monthly average smooths out
   any short-term spikes (hours/days), likely weakening any
   real correlation.
-- **Confounders are uncontrolled** — demographics, deprivation, and local
+- **Confounders are uncontrolled** - demographics, deprivation, and local
   prescribing habits possibly affect both variables.
 
 The value of this project is the **reproducible pipeline** that makes this kind
@@ -43,7 +43,7 @@ of analysis possible, not the strength of this particular correlation.
 
 The final output is an interactive Streamlit dashboard with four views:
 
-- **Data Overview** — headline metrics and coverage for both datasets (currently 2025 data)
+- **Data Overview** - headline metrics and coverage for both datasets (currently 2025 data)
 - **National Trends** — monthly prescribing volumes overlaid with average pollutant levels (PM2.5, PM10, NO2) across all of England
 - **Practice-Level Trends** — drill down to individual GP practices matched to air quality sensors within 10 km
 

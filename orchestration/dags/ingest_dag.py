@@ -40,11 +40,7 @@ def ingest_dag():
     @task
     def refresh_uk_stations():
         """Fetch current UK air quality station IDs from OpenAQ API and upload to GCS."""
-        import csv
-        import io
-        import os
-        import time
-
+        import csv, io, os, time
         import requests
         from google.cloud import storage as gcs
 
@@ -65,7 +61,7 @@ def ingest_dag():
         # Fetch all UK locations (location_id is the station in OpenAQ) with PM2.5, PM10, or NO2
         all_locations = {}
         for param_id, param_name in OPENAQ_PARAMS.items():
-            print(f"  Fetching UK stations with {param_name}...")
+            print(f"Fetching UK stations with {param_name}...")
             page = 1
             while True:
                 resp = requests.get(
@@ -102,6 +98,7 @@ def ingest_dag():
                                 entry["has_pm10"], entry["pm10_sensor_id"] = True, sensor["id"]
                             elif pid == 5:
                                 entry["has_no2"], entry["no2_sensor_id"] = True, sensor["id"]
+                        # Add the monitoring station to all_locations dict
                         all_locations[loc_id] = entry
                 found = resp.json().get("meta", {}).get("found", 0)
                 if page * 1000 >= found or len(results) < 1000:
@@ -134,9 +131,11 @@ def ingest_dag():
 
     @task
     def ingest_openaq_to_gcs(**context):
-        """Stream one month of OpenAQ data from S3 to GCS for all UK stations."""
-        import csv
-        import io
+        """
+        Stream one month of OpenAQ data from S3 to GCS for all UK stations.
+        This task reads the csv file that was created in refresh_uk_stations task.
+        """
+        import csv, io
 
         import boto3
         from botocore import UNSIGNED
@@ -215,7 +214,6 @@ def ingest_dag():
         """Fetch one month of prescribing data from OpenPrescribing API, save as parquet to GCS."""
         import io
         import time
-
         import pandas as pd
         from curl_cffi import requests
         from google.cloud import storage as gcs
@@ -240,7 +238,7 @@ def ingest_dag():
                 impersonate="chrome",
                 timeout=120,
             )
-            resp.raise_for_status()
+            resp.raise_for_status() # aborts whole loop and the airflow task if even 1 section fails
             records = resp.json()
             for rec in records:
                 rec["bnf_section"] = bnf_code
@@ -253,6 +251,7 @@ def ingest_dag():
             print(f"No prescribing data for {date_str}")
             return 0
 
+        # Here we build tabular dataframe and serialise it to parquet file in memoryy
         df = pd.DataFrame(all_records)
         df["period_date"] = f"{year}-{month:02d}-01"
         buf = io.BytesIO()

@@ -83,7 +83,7 @@ def transform_dag():
         )
 
         job = client.load_table_from_uri(uri, table_id, job_config=job_config)
-        result = job.result()
+        result = job.result() # stops python code until data is loaded in bigquery
         print(f"Loaded {result.output_rows} OpenAQ rows (target month={year}-{month:02d})")
         return result.output_rows
 
@@ -146,7 +146,6 @@ def transform_dag():
         client.query(delete_sql).result()
 
         # Prescribing date strings are 'YYYYMMDD' — adjust format string if different.
-        # (Check your data: PARSE_DATE('%Y%m%d', '20250101') works for '20250101'.
         #  If your strings look like '2025-01-01', use '%Y-%m-%d' instead.)
         insert_sql = f"""
             INSERT INTO `{table_id}` (
