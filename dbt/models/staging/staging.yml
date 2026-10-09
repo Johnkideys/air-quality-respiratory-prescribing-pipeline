@@ -1,12 +1,33 @@
+version: 2
+
 models:
+  - name: stg_openaq_measurements
+    description: >
+      Row-preserving staging layer over raw OpenAQ measurements. Adds quality
+      flags but does not filter, except for rows with no timestamp.
+    columns:
+      - name: is_implausible_value
+        description: >
+          TRUE where a reading exceeds the physical plausibility ceiling for its
+          pollutant (see pollutant_reading_thresholds in dbt_project.yml).
+          Filtered in int_monthly_air_quality, not here.
+        tests:
+          - not_null
+
+      - name: is_negative_value
+        tests:
+          - not_null
+
+      - name: measured_at
+        tests:
+          - not_null
+
   - name: stg_prescribing
     description: >
       Staged NHS prescribing data from OpenPrescribing / NHSBSA.
       All rows are preserved from source; quality flags are added
       for downstream filtering in mart models.
     columns:
-      - name: row_id
-        description: Unique identifier for the prescribing row
       - name: ccg_code
         description: Clinical Commissioning Group code
       - name: is_negative_actual_cost

@@ -1,4 +1,4 @@
-"""Tab 3 — Practice-level trends.
+"""Tab 3 - Practice-level trends.
 
 Drill down to a single CCG or practice and see prescribing alongside
 air quality from sensors within 10km.

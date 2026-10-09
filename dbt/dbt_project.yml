@@ -4,6 +4,8 @@ version: '1.0.0'
 profile: air_quality
 
 model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 target-path: "target"
@@ -22,3 +24,15 @@ models:
     marts:
       +materialized: table
       +schema: marts
+
+vars:
+  # Sensor readings implausibility ceilings (µg/m³).
+  # Set ~2-5x above observed p99.9 to catch sensor faults (e.g. PM2.5
+  # readings of 3554, um003 pinning at 65535) without discarding
+  # legitimate high-pollution episodes.
+  pollutant_reading_thresholds:
+    pm25: 250   # p99.9 = 106.7, max = 3554.9
+    pm10: 400   # p99.9 = 88.6,  max = 1681.2
+    no2: 300    # p99.9 = 94.5,  max = 711.0
+    o3: 300     # p99.9 = 139.0, max = 471.7
+    so2: 200    # p99.9 = 37.0,  max = 531.0

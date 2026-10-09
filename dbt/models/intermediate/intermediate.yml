@@ -15,6 +15,11 @@ models:
 
       Station-months with fewer than 70% of expected daily readings are dropped
       to ensure each monthly average is based on adequate temporal coverage.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [location_id, pollutant, month]
+
     columns:
       - name: location_id
         description: OpenAQ sensor location identifier

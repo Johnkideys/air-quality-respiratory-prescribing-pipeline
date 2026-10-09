@@ -4,8 +4,8 @@ WITH filtered AS (
     SELECT *
     FROM {{ ref('stg_openaq_measurements') }}
     WHERE is_negative_value = FALSE
-      AND measured_at IS NOT NULL
       AND is_respiratory_pollutant = TRUE
+      AND is_implausible_value = FALSE
 ),
 
 averaged_daily AS (
@@ -56,11 +56,12 @@ averaged_monthly AS (
 SELECT *
 FROM averaged_monthly
 WHERE days_with_data >= CEIL(0.70 * EXTRACT(DAY FROM LAST_DAY(month)))
-  AND avg_value <= CASE
-        WHEN pollutant = 'pm25' THEN 100   -- physically plausible UK ceiling
-        WHEN pollutant = 'pm10' THEN 150
-        WHEN pollutant = 'no2'  THEN 400
-        WHEN pollutant = 'o3'   THEN 300
-        WHEN pollutant = 'so2'  THEN 200
-        ELSE 1e9
-    END
+-- Removed below and now filtering outlier values in in the staging model 
+--   AND avg_value <= CASE
+--         WHEN pollutant = 'pm25' THEN 100   -- physically plausible UK ceiling
+--         WHEN pollutant = 'pm10' THEN 150
+--         WHEN pollutant = 'no2'  THEN 400
+--         WHEN pollutant = 'o3'   THEN 300
+--         WHEN pollutant = 'so2'  THEN 200
+--         ELSE 1e9
+--     END

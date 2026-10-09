@@ -40,10 +40,30 @@ renamed as (
             else false
         end                                             as is_respiratory_pollutant
 
+
     from source
 
     where datetime is not null  -- drop rows with no timestamp
 
+),
+
+data_quality_flags as (
+
+    select
+        *,
+        -- the variable pollutant_reading_thresholds is defined in dbt_project.yml and jinja converts this to a dict
+        coalesce(
+            case
+                {% for pollutant, threshold in var('pollutant_reading_thresholds').items() %}
+                when lower(pollutant) = '{{ pollutant }}' then measured_value > {{ threshold }}
+                {% endfor %}
+                else false
+            end,
+            false
+        )                                               as is_implausible_value
+
+    from renamed
+
 )
 
-select * from renamed
+select * from data_quality_flags

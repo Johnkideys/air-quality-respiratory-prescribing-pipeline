@@ -16,7 +16,7 @@
 
 ## Problem Statement/Hypothesis
 
-Does air pollution affect how many asthma inhalers are prescribed? This project builds an end-to-end data pipeline that combines **UK air quality readings** with **NHS GP prescribing data** to explore the relationship between pollution levels and respiratory medication use across England.
+**Is poor air quality associated with higher asthma inhaler prescribing in England?** This project builds an end-to-end data pipeline that combines UK air quality readings with NHS GP prescribing data to explore the relationship between pollution levels and respiratory medication use across England.
 
 ## Key Findings
 

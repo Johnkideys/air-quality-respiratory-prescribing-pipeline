@@ -1,7 +1,7 @@
 """Tab 2 — National trends.
 
 Aggregate prescribing across all of England against national average
-pollutant levels. Lets the user pick which pollutant and which BNF
+pollutant levels. User can pick which pollutant and which BNF
 categories to compare.
 """
 
